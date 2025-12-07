@@ -24,7 +24,7 @@ var __TURBOPACK__imported__module__$5b$project$5d2f$heroes_guess_dapp$2f$node_mo
 var __TURBOPACK__imported__module__$5b$project$5d2f$heroes_guess_dapp$2f$node_modules$2f40$iota$2f$dapp$2d$kit$2f$dist$2f$esm$2f$index$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__ = __turbopack_context__.i("[project]/heroes_guess_dapp/node_modules/@iota/dapp-kit/dist/esm/index.js [app-client] (ecmascript)");
 ;
 ;
-const DEVNET_PACKAGE_ID = "0xaf671bc1321d0eba20cfe70d7e6951d7a096728269bf797db6854387f2a62efb";
+const DEVNET_PACKAGE_ID = "0x0d572c1f2d860d5f5fca2d21facfc570738489c5cd9db9363ae0196f4df85e0c";
 const TESTNET_PACKAGE_ID = "";
 const MAINNET_PACKAGE_ID = "";
 // Network configuration

@@ -42,10 +42,10 @@ __turbopack_context__.s([
     ()=>useContract
 ]);
 /**
- * IOTA CONTRACT INTEGRATION HOOK (SDK MỚI - TransactionBlock)
+ * IOTA CONTRACT INTEGRATION HOOK
  */ var __TURBOPACK__imported__module__$5b$project$5d2f$heroes_guess_dapp$2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__ = __turbopack_context__.i("[project]/heroes_guess_dapp/node_modules/next/dist/server/route-modules/app-page/vendored/ssr/react.js [app-ssr] (ecmascript)");
 var __TURBOPACK__imported__module__$5b$project$5d2f$heroes_guess_dapp$2f$node_modules$2f40$iota$2f$dapp$2d$kit$2f$dist$2f$esm$2f$index$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__ = __turbopack_context__.i("[project]/heroes_guess_dapp/node_modules/@iota/dapp-kit/dist/esm/index.js [app-ssr] (ecmascript)");
-var __TURBOPACK__imported__module__$5b$project$5d2f$heroes_guess_dapp$2f$node_modules$2f40$iota$2f$iota$2d$sdk$2f$dist$2f$esm$2f$transactions$2f$index$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__ = __turbopack_context__.i("[project]/heroes_guess_dapp/node_modules/@iota/iota-sdk/dist/esm/transactions/index.js [app-ssr] (ecmascript)");
+var __TURBOPACK__imported__module__$5b$project$5d2f$heroes_guess_dapp$2f$node_modules$2f40$iota$2f$iota$2d$sdk$2f$dist$2f$esm$2f$transactions$2f$Transaction$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__ = __turbopack_context__.i("[project]/heroes_guess_dapp/node_modules/@iota/iota-sdk/dist/esm/transactions/Transaction.js [app-ssr] (ecmascript)");
 var __TURBOPACK__imported__module__$5b$project$5d2f$heroes_guess_dapp$2f$lib$2f$config$2e$ts__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__ = __turbopack_context__.i("[project]/heroes_guess_dapp/lib/config.ts [app-ssr] (ecmascript)");
 "use client";
 ;
@@ -58,24 +58,47 @@ const CONTRACT_METHODS = {
     INCREMENT: "increment",
     SET_VALUE: "set_value"
 };
-// Extract fields
+// Extract fields robustly
 function getObjectFields(data) {
     if (!data) return null;
-    if (data.content?.dataType !== "moveObject") return null;
+    if (data.content?.dataType !== "moveObject") {
+        console.log("Data is not a moveObject:", data.content?.dataType);
+        return null;
+    }
     const fields = data.content.fields;
-    if (!fields) return null;
+    if (!fields) {
+        console.log("No fields found in object data");
+        return null;
+    }
+    // Log to help debugging
+    // console.log("Object fields structure:", JSON.stringify(fields, null, 2))
+    // value may be string (u64) or number
     let value;
     if (typeof fields.value === "string") {
         value = parseInt(fields.value, 10);
+        if (isNaN(value)) {
+            console.log("Value is not a valid number:", fields.value);
+            return null;
+        }
     } else if (typeof fields.value === "number") {
         value = fields.value;
+    } else if (fields.value && typeof fields.value === "object" && typeof fields.value.fields === "object" && typeof fields.value.fields.value !== "undefined") {
+        // handle nested shape if any
+        const maybe = fields.value.fields.value;
+        value = typeof maybe === "string" ? parseInt(maybe, 10) : Number(maybe);
+        if (isNaN(value)) return null;
     } else {
+        console.log("Value is not a number or string:", typeof fields.value, fields.value);
         return null;
     }
-    if (!fields.owner) return null;
+    if (!fields.owner && fields.owner !== 0) {
+        console.log("Owner field is missing");
+        return null;
+    }
+    const owner = String(fields.owner);
     return {
         value,
-        owner: String(fields.owner)
+        owner
     };
 }
 const useContract = ()=>{
@@ -88,14 +111,15 @@ const useContract = ()=>{
     const [isLoading, setIsLoading] = (0, __TURBOPACK__imported__module__$5b$project$5d2f$heroes_guess_dapp$2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["useState"])(false);
     const [hash, setHash] = (0, __TURBOPACK__imported__module__$5b$project$5d2f$heroes_guess_dapp$2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["useState"])();
     const [transactionError, setTransactionError] = (0, __TURBOPACK__imported__module__$5b$project$5d2f$heroes_guess_dapp$2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["useState"])(null);
-    // Load objectId from URL hash
+    // load objectId from location.hash
     (0, __TURBOPACK__imported__module__$5b$project$5d2f$heroes_guess_dapp$2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["useEffect"])(()=>{
         if ("TURBOPACK compile-time falsy", 0) //TURBOPACK unreachable
         ;
     }, []);
-    // Query object
+    // Query the object only when we have objectId
     const queryEnabled = !!objectId;
-    const { data: queryResponse, isPending: isFetching, error: queryError, refetch } = (0, __TURBOPACK__imported__module__$5b$project$5d2f$heroes_guess_dapp$2f$node_modules$2f40$iota$2f$dapp$2d$kit$2f$dist$2f$esm$2f$index$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["useIotaClientQuery"])("getObject", queryEnabled ? {
+    const { data: queryResponse, isPending: isFetching, error: queryError, refetch } = (0, __TURBOPACK__imported__module__$5b$project$5d2f$heroes_guess_dapp$2f$node_modules$2f40$iota$2f$dapp$2d$kit$2f$dist$2f$esm$2f$index$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["useIotaClientQuery"])("getObject", // pass params only when enabled to avoid passing undefined id
+    queryEnabled ? {
         id: objectId,
         options: {
             showContent: true,
@@ -104,6 +128,7 @@ const useContract = ()=>{
     } : undefined, {
         enabled: queryEnabled
     });
+    // Normalize the returned object data (robust to shapes)
     const rawObject = queryResponse?.data ?? queryResponse ?? null;
     const fields = rawObject ? getObjectFields(rawObject) : null;
     const contractData = fields ? {
@@ -113,17 +138,20 @@ const useContract = ()=>{
     const isOwner = !!(fields && address && fields.owner.toLowerCase() === address.toLowerCase());
     const objectExists = !!rawObject;
     const hasValidData = !!fields;
-    // ✅ CREATE OBJECT
+    // create object
     const createObject = async ()=>{
-        if (!packageId) return;
+        if (!packageId) {
+            setTransactionError(new Error("packageId not configured"));
+            return;
+        }
         try {
             setIsLoading(true);
             setTransactionError(null);
             setHash(undefined);
-            const tx = new __TURBOPACK__imported__module__$5b$project$5d2f$heroes_guess_dapp$2f$node_modules$2f40$iota$2f$iota$2d$sdk$2f$dist$2f$esm$2f$transactions$2f$index$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["TransactionBlock"]();
+            const tx = new __TURBOPACK__imported__module__$5b$project$5d2f$heroes_guess_dapp$2f$node_modules$2f40$iota$2f$iota$2d$sdk$2f$dist$2f$esm$2f$transactions$2f$Transaction$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["Transaction"]();
             tx.moveCall({
-                target: `${packageId}::${CONTRACT_MODULE}::${CONTRACT_METHODS.CREATE}`,
-                arguments: []
+                arguments: [],
+                target: `${packageId}::${CONTRACT_MODULE}::${CONTRACT_METHODS.CREATE}`
             });
             signAndExecute({
                 transaction: tx
@@ -142,33 +170,45 @@ const useContract = ()=>{
                             setObjectId(newObjectId);
                             if ("TURBOPACK compile-time falsy", 0) //TURBOPACK unreachable
                             ;
+                        } else {
+                            console.warn("No object ID found in transaction effects");
                         }
+                    } catch (waitError) {
+                        console.error("Error waiting for transaction:", waitError);
+                        setTransactionError(waitError instanceof Error ? waitError : new Error(String(waitError)));
                     } finally{
                         setIsLoading(false);
                     }
                 },
                 onError: (err)=>{
-                    setTransactionError(err);
+                    const error = err instanceof Error ? err : new Error(String(err));
+                    setTransactionError(error);
+                    console.error("Error:", err);
                     setIsLoading(false);
                 }
             });
         } catch (err) {
-            setTransactionError(err);
+            const error = err instanceof Error ? err : new Error(String(err));
+            setTransactionError(error);
+            console.error("Error creating object:", err);
             setIsLoading(false);
         }
     };
-    // ✅ INCREMENT
+    // increment
     const increment = async ()=>{
-        if (!objectId || !packageId) return;
+        if (!objectId || !packageId) {
+            setTransactionError(new Error("Missing objectId or packageId"));
+            return;
+        }
         try {
             setIsLoading(true);
             setTransactionError(null);
-            const tx = new __TURBOPACK__imported__module__$5b$project$5d2f$heroes_guess_dapp$2f$node_modules$2f40$iota$2f$iota$2d$sdk$2f$dist$2f$esm$2f$transactions$2f$index$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["TransactionBlock"]();
+            const tx = new __TURBOPACK__imported__module__$5b$project$5d2f$heroes_guess_dapp$2f$node_modules$2f40$iota$2f$iota$2d$sdk$2f$dist$2f$esm$2f$transactions$2f$Transaction$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["Transaction"]();
             tx.moveCall({
-                target: `${packageId}::${CONTRACT_MODULE}::${CONTRACT_METHODS.INCREMENT}`,
                 arguments: [
                     tx.object(objectId)
-                ]
+                ],
+                target: `${packageId}::${CONTRACT_MODULE}::${CONTRACT_METHODS.INCREMENT}`
             });
             signAndExecute({
                 transaction: tx
@@ -180,37 +220,46 @@ const useContract = ()=>{
                             digest
                         });
                         if (refetch) await refetch();
+                    } catch (e) {
+                        console.error("Wait or refetch failed:", e);
                     } finally{
                         setIsLoading(false);
                     }
                 },
                 onError: (err)=>{
-                    setTransactionError(err);
+                    const error = err instanceof Error ? err : new Error(String(err));
+                    setTransactionError(error);
+                    console.error("Error:", err);
                     setIsLoading(false);
                 }
             });
         } catch (err) {
-            setTransactionError(err);
+            const error = err instanceof Error ? err : new Error(String(err));
+            setTransactionError(error);
+            console.error("Error incrementing:", err);
             setIsLoading(false);
         }
     };
-    // ✅ RESET
+    // reset (set to 0)
     const reset = async ()=>{
         await setValue(0);
     };
-    // ✅ SET VALUE
+    // set value
     const setValue = async (value)=>{
-        if (!objectId || !packageId) return;
+        if (!objectId || !packageId) {
+            setTransactionError(new Error("Missing objectId or packageId"));
+            return;
+        }
         try {
             setIsLoading(true);
             setTransactionError(null);
-            const tx = new __TURBOPACK__imported__module__$5b$project$5d2f$heroes_guess_dapp$2f$node_modules$2f40$iota$2f$iota$2d$sdk$2f$dist$2f$esm$2f$transactions$2f$index$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["TransactionBlock"]();
+            const tx = new __TURBOPACK__imported__module__$5b$project$5d2f$heroes_guess_dapp$2f$node_modules$2f40$iota$2f$iota$2d$sdk$2f$dist$2f$esm$2f$transactions$2f$Transaction$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["Transaction"]();
             tx.moveCall({
-                target: `${packageId}::${CONTRACT_MODULE}::${CONTRACT_METHODS.SET_VALUE}`,
                 arguments: [
                     tx.object(objectId),
-                    tx.pure(value)
-                ]
+                    tx.pure.u64(value)
+                ],
+                target: `${packageId}::${CONTRACT_MODULE}::${CONTRACT_METHODS.SET_VALUE}`
             });
             signAndExecute({
                 transaction: tx
@@ -222,27 +271,47 @@ const useContract = ()=>{
                             digest
                         });
                         if (refetch) await refetch();
+                    } catch (e) {
+                        console.error("Wait/refetch failed:", e);
                     } finally{
                         setIsLoading(false);
                     }
                 },
                 onError: (err)=>{
-                    setTransactionError(err);
+                    const error = err instanceof Error ? err : new Error(String(err));
+                    setTransactionError(error);
+                    console.error("Error:", err);
                     setIsLoading(false);
                 }
             });
         } catch (err) {
-            setTransactionError(err);
+            const error = err instanceof Error ? err : new Error(String(err));
+            setTransactionError(error);
+            console.error("Error setting value:", err);
             setIsLoading(false);
         }
     };
-    // ✅ CLEAR
     const clearObject = ()=>{
         setObjectId(null);
         setTransactionError(null);
         setHash(undefined);
         if ("TURBOPACK compile-time falsy", 0) //TURBOPACK unreachable
         ;
+    };
+    const actions = {
+        createObject,
+        increment,
+        reset,
+        setValue,
+        clearObject
+    };
+    const contractState = {
+        isLoading: isLoading && !objectId || isFetching,
+        isPending,
+        isConfirming: false,
+        isConfirmed: !!hash && !isLoading && !isPending,
+        hash,
+        error: queryError || transactionError
     };
     return {
         data: contractData,
@@ -883,7 +952,9 @@ var __TURBOPACK__imported__module__$5b$project$5d2f$heroes_guess_dapp$2f$hooks$2
 var __TURBOPACK__imported__module__$5b$project$5d2f$heroes_guess_dapp$2f$components$2f$sample$2e$tsx__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__ = __turbopack_context__.i("[project]/heroes_guess_dapp/components/sample.tsx [app-ssr] (ecmascript)");
 var __TURBOPACK__imported__module__$5b$project$5d2f$heroes_guess_dapp$2f$lib$2f$champions$2e$ts__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__ = __turbopack_context__.i("[project]/heroes_guess_dapp/lib/champions.ts [app-ssr] (ecmascript)");
 var __TURBOPACK__imported__module__$5b$project$5d2f$heroes_guess_dapp$2f$node_modules$2f$next$2f$image$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__ = __turbopack_context__.i("[project]/heroes_guess_dapp/node_modules/next/image.js [app-ssr] (ecmascript)");
+var __TURBOPACK__imported__module__$5b$project$5d2f$heroes_guess_dapp$2f$node_modules$2f40$iota$2f$dapp$2d$kit$2f$dist$2f$esm$2f$index$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__ = __turbopack_context__.i("[project]/heroes_guess_dapp/node_modules/@iota/dapp-kit/dist/esm/index.js [app-ssr] (ecmascript)");
 "use client";
+;
 ;
 ;
 ;
@@ -893,6 +964,7 @@ var __TURBOPACK__imported__module__$5b$project$5d2f$heroes_guess_dapp$2f$node_mo
 ;
 const LATEST_LOL_VERSION = "14.9.1";
 function Home() {
+    const currentAccount = (0, __TURBOPACK__imported__module__$5b$project$5d2f$heroes_guess_dapp$2f$node_modules$2f40$iota$2f$dapp$2d$kit$2f$dist$2f$esm$2f$index$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["useCurrentAccount"])();
     const [isPlaying, setIsPlaying] = (0, __TURBOPACK__imported__module__$5b$project$5d2f$heroes_guess_dapp$2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["useState"])(false);
     const [score, setScore] = (0, __TURBOPACK__imported__module__$5b$project$5d2f$heroes_guess_dapp$2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["useState"])(0);
     const [heroToGuess, setHeroToGuess] = (0, __TURBOPACK__imported__module__$5b$project$5d2f$heroes_guess_dapp$2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["useState"])(null);
@@ -900,16 +972,43 @@ function Home() {
     const [message, setMessage] = (0, __TURBOPACK__imported__module__$5b$project$5d2f$heroes_guess_dapp$2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["useState"])("Press 'Start Game' to begin!");
     const [shuffledChampions, setShuffledChampions] = (0, __TURBOPACK__imported__module__$5b$project$5d2f$heroes_guess_dapp$2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["useState"])([]);
     const [currentIndex, setCurrentIndex] = (0, __TURBOPACK__imported__module__$5b$project$5d2f$heroes_guess_dapp$2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["useState"])(0);
-    const { data, actions, state } = (0, __TURBOPACK__imported__module__$5b$project$5d2f$heroes_guess_dapp$2f$hooks$2f$useContract$2e$ts__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["useContract"])();
-    const { setValue } = actions;
-    const { isPending, isConfirming, isConfirmed, error } = state;
+    const { data, actions, state, objectId, objectExists } = (0, __TURBOPACK__imported__module__$5b$project$5d2f$heroes_guess_dapp$2f$hooks$2f$useContract$2e$ts__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["useContract"])();
+    const { setValue, createObject, clearObject } = actions;
+    const { isPending, isConfirming, isConfirmed, error, isLoading } = state;
     // Shuffle champions on initial load
     (0, __TURBOPACK__imported__module__$5b$project$5d2f$heroes_guess_dapp$2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["useEffect"])(()=>{
         setShuffledChampions([
             ...__TURBOPACK__imported__module__$5b$project$5d2f$heroes_guess_dapp$2f$lib$2f$champions$2e$ts__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["champions"]
         ].sort(()=>Math.random() - 0.5));
     }, []);
+    // Tự động bắt đầu game khi contract object được tạo xong
+    (0, __TURBOPACK__imported__module__$5b$project$5d2f$heroes_guess_dapp$2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["useEffect"])(()=>{
+        if (objectExists && objectId && !isPlaying && shuffledChampions.length > 0) {
+            const hasJustCreated = sessionStorage.getItem('pendingGameStart');
+            if (hasJustCreated === 'true') {
+                sessionStorage.removeItem('pendingGameStart');
+                setIsPlaying(true);
+                setScore(0);
+                setUserGuess("");
+                setCurrentIndex(0);
+                setHeroToGuess(shuffledChampions[0]);
+                setMessage("Which champion is this?");
+            }
+        }
+    }, [
+        objectExists,
+        objectId,
+        isPlaying,
+        shuffledChampions
+    ]);
     const startGame = ()=>{
+        // Nếu chưa có contract object, tạo mới
+        if (!objectExists) {
+            setMessage("Creating contract... Please approve the transaction in your wallet.");
+            sessionStorage.setItem('pendingGameStart', 'true');
+            createObject();
+            return;
+        }
         setIsPlaying(true);
         setScore(0);
         setUserGuess("");
@@ -960,18 +1059,18 @@ function Home() {
                         children: "Champion Guessing Game"
                     }, void 0, false, {
                         fileName: "[project]/heroes_guess_dapp/app/page.tsx",
-                        lineNumber: 83,
+                        lineNumber: 109,
                         columnNumber: 5
                     }, this),
                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$heroes_guess_dapp$2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$heroes_guess_dapp$2f$components$2f$Wallet$2d$connect$2e$tsx__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["WalletConnect"], {}, void 0, false, {
                         fileName: "[project]/heroes_guess_dapp/app/page.tsx",
-                        lineNumber: 84,
+                        lineNumber: 110,
                         columnNumber: 5
                     }, this)
                 ]
             }, void 0, true, {
                 fileName: "[project]/heroes_guess_dapp/app/page.tsx",
-                lineNumber: 82,
+                lineNumber: 108,
                 columnNumber: 4
             }, this),
             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$heroes_guess_dapp$2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("main", {
@@ -986,31 +1085,32 @@ function Home() {
                                     children: "Welcome!"
                                 }, void 0, false, {
                                     fileName: "[project]/heroes_guess_dapp/app/page.tsx",
-                                    lineNumber: 91,
-                                    columnNumber: 8
+                                    lineNumber: 117,
+                                    columnNumber: 7
                                 }, this),
                                 /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$heroes_guess_dapp$2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("p", {
                                     className: "message",
                                     children: message
                                 }, void 0, false, {
                                     fileName: "[project]/heroes_guess_dapp/app/page.tsx",
-                                    lineNumber: 92,
-                                    columnNumber: 8
+                                    lineNumber: 118,
+                                    columnNumber: 7
                                 }, this),
                                 /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$heroes_guess_dapp$2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("button", {
                                     onClick: startGame,
                                     className: "btn btn-start",
-                                    children: "Start Game"
+                                    disabled: !currentAccount,
+                                    children: !currentAccount ? "Connect Wallet First" : "Start Game"
                                 }, void 0, false, {
                                     fileName: "[project]/heroes_guess_dapp/app/page.tsx",
-                                    lineNumber: 93,
-                                    columnNumber: 8
+                                    lineNumber: 119,
+                                    columnNumber: 7
                                 }, this)
                             ]
                         }, void 0, true, {
                             fileName: "[project]/heroes_guess_dapp/app/page.tsx",
-                            lineNumber: 90,
-                            columnNumber: 7
+                            lineNumber: 116,
+                            columnNumber: 6
                         }, this) : /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$heroes_guess_dapp$2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
                             className: "game-active",
                             children: heroToGuess ? /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$heroes_guess_dapp$2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$heroes_guess_dapp$2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["Fragment"], {
@@ -1026,12 +1126,12 @@ function Home() {
                                             priority: true
                                         }, void 0, false, {
                                             fileName: "[project]/heroes_guess_dapp/app/page.tsx",
-                                            lineNumber: 103,
+                                            lineNumber: 133,
                                             columnNumber: 11
                                         }, this)
                                     }, void 0, false, {
                                         fileName: "[project]/heroes_guess_dapp/app/page.tsx",
-                                        lineNumber: 102,
+                                        lineNumber: 132,
                                         columnNumber: 10
                                     }, this),
                                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$heroes_guess_dapp$2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("h2", {
@@ -1042,7 +1142,7 @@ function Home() {
                                         ]
                                     }, void 0, true, {
                                         fileName: "[project]/heroes_guess_dapp/app/page.tsx",
-                                        lineNumber: 112,
+                                        lineNumber: 142,
                                         columnNumber: 10
                                     }, this),
                                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$heroes_guess_dapp$2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("p", {
@@ -1050,7 +1150,7 @@ function Home() {
                                         children: message
                                     }, void 0, false, {
                                         fileName: "[project]/heroes_guess_dapp/app/page.tsx",
-                                        lineNumber: 113,
+                                        lineNumber: 143,
                                         columnNumber: 10
                                     }, this),
                                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$heroes_guess_dapp$2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -1065,7 +1165,7 @@ function Home() {
                                                 placeholder: "Enter champion name..."
                                             }, void 0, false, {
                                                 fileName: "[project]/heroes_guess_dapp/app/page.tsx",
-                                                lineNumber: 116,
+                                                lineNumber: 146,
                                                 columnNumber: 11
                                             }, this),
                                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$heroes_guess_dapp$2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("button", {
@@ -1074,13 +1174,13 @@ function Home() {
                                                 children: "Guess"
                                             }, void 0, false, {
                                                 fileName: "[project]/heroes_guess_dapp/app/page.tsx",
-                                                lineNumber: 124,
+                                                lineNumber: 154,
                                                 columnNumber: 11
                                             }, this)
                                         ]
                                     }, void 0, true, {
                                         fileName: "[project]/heroes_guess_dapp/app/page.tsx",
-                                        lineNumber: 115,
+                                        lineNumber: 145,
                                         columnNumber: 10
                                     }, this),
                                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$heroes_guess_dapp$2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("button", {
@@ -1090,7 +1190,7 @@ function Home() {
                                         children: isPending || isConfirming ? "Saving..." : "Stop Game"
                                     }, void 0, false, {
                                         fileName: "[project]/heroes_guess_dapp/app/page.tsx",
-                                        lineNumber: 129,
+                                        lineNumber: 159,
                                         columnNumber: 10
                                     }, this)
                                 ]
@@ -1098,17 +1198,17 @@ function Home() {
                                 children: "Loading champion..."
                             }, void 0, false, {
                                 fileName: "[project]/heroes_guess_dapp/app/page.tsx",
-                                lineNumber: 134,
+                                lineNumber: 164,
                                 columnNumber: 9
                             }, this)
                         }, void 0, false, {
                             fileName: "[project]/heroes_guess_dapp/app/page.tsx",
-                            lineNumber: 98,
+                            lineNumber: 128,
                             columnNumber: 7
                         }, this)
                     }, void 0, false, {
                         fileName: "[project]/heroes_guess_dapp/app/page.tsx",
-                        lineNumber: 88,
+                        lineNumber: 114,
                         columnNumber: 5
                     }, this),
                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$heroes_guess_dapp$2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -1120,62 +1220,85 @@ function Home() {
                                 },
                                 children: /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$heroes_guess_dapp$2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$heroes_guess_dapp$2f$components$2f$sample$2e$tsx__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["default"], {}, void 0, false, {
                                     fileName: "[project]/heroes_guess_dapp/app/page.tsx",
-                                    lineNumber: 142,
+                                    lineNumber: 172,
                                     columnNumber: 7
                                 }, this)
                             }, void 0, false, {
                                 fileName: "[project]/heroes_guess_dapp/app/page.tsx",
-                                lineNumber: 141,
+                                lineNumber: 171,
                                 columnNumber: 6
+                            }, this),
+                            isLoading && /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$heroes_guess_dapp$2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("p", {
+                                children: "Processing transaction..."
+                            }, void 0, false, {
+                                fileName: "[project]/heroes_guess_dapp/app/page.tsx",
+                                lineNumber: 174,
+                                columnNumber: 20
                             }, this),
                             isPending && /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$heroes_guess_dapp$2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("p", {
                                 children: "Transaction is pending..."
                             }, void 0, false, {
                                 fileName: "[project]/heroes_guess_dapp/app/page.tsx",
-                                lineNumber: 144,
+                                lineNumber: 175,
                                 columnNumber: 20
                             }, this),
                             isConfirming && /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$heroes_guess_dapp$2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("p", {
                                 children: "Transaction is confirming..."
                             }, void 0, false, {
                                 fileName: "[project]/heroes_guess_dapp/app/page.tsx",
-                                lineNumber: 145,
+                                lineNumber: 176,
                                 columnNumber: 23
                             }, this),
-                            isConfirmed && /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$heroes_guess_dapp$2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("p", {
-                                children: "Transaction confirmed!"
-                            }, void 0, false, {
+                            isConfirmed && state.hash && /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$heroes_guess_dapp$2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("p", {
+                                children: [
+                                    "Transaction confirmed!",
+                                    /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$heroes_guess_dapp$2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("a", {
+                                        href: `https://explorer.rebased.iota.org/txblock/${state.hash}?network=devnet`,
+                                        target: "_blank",
+                                        rel: "noopener noreferrer",
+                                        style: {
+                                            marginLeft: '0.5rem',
+                                            color: '#4CAF50'
+                                        },
+                                        children: "View on Explorer"
+                                    }, void 0, false, {
+                                        fileName: "[project]/heroes_guess_dapp/app/page.tsx",
+                                        lineNumber: 180,
+                                        columnNumber: 8
+                                    }, this)
+                                ]
+                            }, void 0, true, {
                                 fileName: "[project]/heroes_guess_dapp/app/page.tsx",
-                                lineNumber: 146,
-                                columnNumber: 22
+                                lineNumber: 178,
+                                columnNumber: 7
                             }, this),
                             error && /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$heroes_guess_dapp$2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("p", {
                                 className: "error-message",
                                 children: [
                                     "Error: ",
-                                    error
+                                    error.message || String(error)
                                 ]
                             }, void 0, true, {
                                 fileName: "[project]/heroes_guess_dapp/app/page.tsx",
-                                lineNumber: 147,
+                                lineNumber: 190,
                                 columnNumber: 16
                             }, this)
                         ]
                     }, void 0, true, {
                         fileName: "[project]/heroes_guess_dapp/app/page.tsx",
-                        lineNumber: 140,
+                        lineNumber: 170,
                         columnNumber: 5
                     }, this)
                 ]
             }, void 0, true, {
                 fileName: "[project]/heroes_guess_dapp/app/page.tsx",
-                lineNumber: 87,
+                lineNumber: 113,
                 columnNumber: 4
             }, this)
         ]
     }, void 0, true, {
         fileName: "[project]/heroes_guess_dapp/app/page.tsx",
-        lineNumber: 81,
+        lineNumber: 107,
         columnNumber: 3
     }, this);
 }

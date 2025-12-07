@@ -1,0 +1,13 @@
+__turbopack_load_page_chunks__("/_error", [
+  "static/chunks/0cc17_next_dist_compiled_90719ab3._.js",
+  "static/chunks/0cc17_next_dist_shared_lib_df080729._.js",
+  "static/chunks/0cc17_next_dist_client_eb086a9f._.js",
+  "static/chunks/0cc17_next_dist_5509c57b._.js",
+  "static/chunks/0cc17_next_error_a95d3812.js",
+  "static/chunks/[next]_entry_page-loader_ts_2ea6b206._.js",
+  "static/chunks/0cc17_react-dom_18570fa5._.js",
+  "static/chunks/0cc17_35864fb9._.js",
+  "static/chunks/[root-of-the-server]__9938dc84._.js",
+  "static/chunks/heroes_guess_dapp_pages__error_2da965e7._.js",
+  "static/chunks/turbopack-heroes_guess_dapp_pages__error_3e0c1da5._.js"
+])

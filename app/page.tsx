@@ -3,13 +3,14 @@
 import { WalletConnect } from "@/components/Wallet-connect";
 import { useState, useEffect } from "react";
 import { useContract } from "@/hooks/useContract";
-import SampleIntegration from "@/components/sample";
 import { champions, Champion } from "@/lib/champions";
 import Image from 'next/image';
+import { useCurrentAccount } from "@iota/dapp-kit";
 
 const LATEST_LOL_VERSION = "14.9.1";
 
 export default function Home() {
+	const currentAccount = useCurrentAccount();
 	const [isPlaying, setIsPlaying] = useState(false);
 	const [score, setScore] = useState(0);
 	const [heroToGuess, setHeroToGuess] = useState<Champion | null>(null);
@@ -18,16 +19,40 @@ export default function Home() {
 	const [shuffledChampions, setShuffledChampions] = useState<Champion[]>([]);
 	const [currentIndex, setCurrentIndex] = useState(0);
 
-	const { data, actions, state } = useContract();
-const { setValue } = actions;
-const { isPending, isConfirming, isConfirmed, error } = state;
+	const { data, actions, state, objectId, objectExists } = useContract();
+	const { setValue, createObject, clearObject } = actions;
+	const { isPending, isConfirming, isConfirmed, error, isLoading } = state;
 
 	// Shuffle champions on initial load
 	useEffect(() => {
 		setShuffledChampions([...champions].sort(() => Math.random() - 0.5));
 	}, []);
 
+	// Tự động bắt đầu game khi contract object được tạo xong
+	useEffect(() => {
+		if (objectExists && objectId && !isPlaying && shuffledChampions.length > 0) {
+			const hasJustCreated = sessionStorage.getItem('pendingGameStart');
+			if (hasJustCreated === 'true') {
+				sessionStorage.removeItem('pendingGameStart');
+				setIsPlaying(true);
+				setScore(0);
+				setUserGuess("");
+				setCurrentIndex(0);
+				setHeroToGuess(shuffledChampions[0]);
+				setMessage("Which champion is this?");
+			}
+		}
+	}, [objectExists, objectId, isPlaying, shuffledChampions]);
+
 	const startGame = () => {
+		// Nếu chưa có contract object, tạo mới
+		if (!objectExists) {
+			setMessage("Creating contract... Please approve the transaction in your wallet.");
+			sessionStorage.setItem('pendingGameStart', 'true');
+			createObject();
+			return;
+		}
+		
 		setIsPlaying(true);
 		setScore(0);
 		setUserGuess("");
@@ -87,13 +112,17 @@ const { isPending, isConfirming, isConfirmed, error } = state;
 			<main className="main-content">
 				<div className="game-card">
 					{!isPlaying ? (
-						<div className="game-intro">
-							<h2>Welcome!</h2>
-							<p className="message">{message}</p>
-							<button onClick={startGame} className="btn btn-start">
-								Start Game
-							</button>
-						</div>
+					<div className="game-intro">
+						<h2>Welcome!</h2>
+						<p className="message">{message}</p>
+						<button 
+							onClick={startGame} 
+							className="btn btn-start"
+							disabled={!currentAccount}
+						>
+							{!currentAccount ? "Connect Wallet First" : "Start Game"}
+						</button>
+					</div>
 					) : (
 						<div className="game-active">
 							{/* Ensure heroToGuess is not null before rendering */}
@@ -137,15 +166,27 @@ const { isPending, isConfirming, isConfirmed, error } = state;
 					)}
 				</div>
 				
-				<div className="contract-status">
-					<div style={{ margin: "1rem 0" }}>
-						<SampleIntegration />
+				{(isLoading || isPending || isConfirmed || error) && (
+					<div className="contract-status">
+						{isLoading && <p>Processing transaction...</p>}
+						{isPending && <p>Transaction is pending...</p>}
+						{isConfirming && <p>Transaction is confirming...</p>}
+						{isConfirmed && state.hash && (
+							<p>
+								Transaction confirmed! 
+								<a 
+									href={`https://explorer.rebased.iota.org/txblock/${state.hash}?network=devnet`}
+									target="_blank"
+									rel="noopener noreferrer"
+									style={{ marginLeft: '0.5rem', color: '#4CAF50' }}
+								>
+									View on Explorer
+								</a>
+							</p>
+						)}
+						{error && <p className="error-message">Error: {error.message || String(error)}</p>}
 					</div>
-					{isPending && <p>Transaction is pending...</p>}
-					{isConfirming && <p>Transaction is confirming...</p>}
-					{isConfirmed && <p>Transaction confirmed!</p>}
-					{error && <p className="error-message">Error: {error}</p>}
-				</div>
+				)}
 			</main>
 		</div>
 	);

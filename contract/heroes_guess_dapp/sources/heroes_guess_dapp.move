@@ -30,7 +30,7 @@ module heroes_guess_dapp::contract {
   }
 
   /// Set value (only runnable by the HeroesGuessDapp owner)
-  public fun set_value(counter: &mut HeroesGuessDapp, value: u64, ctx: &TxContext) {
+  public entry fun set_value(counter: &mut HeroesGuessDapp, value: u64, ctx: &TxContext) {
     assert!(counter.owner == ctx.sender(), 0);
     counter.value = value;
   }
