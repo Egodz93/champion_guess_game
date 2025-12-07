@@ -14,6 +14,8 @@ npm run iota-deploy
 # Start development server
 npm run dev
 ```
+## Smart Contract
+Contract Address (Testnet Deployment): 0x5d6abd5384905adc1c6618e6d3a164db2a51cfcf8d4035031677523ab1d91ae0
 
 ## 🎯 Features
 
