@@ -1,0 +1,114 @@
+[00:00:01.048] Server  LOG      ✓ Ready in 800ms
+[00:00:04.086] Server  LOG      ○ Compiling / ...
+[00:00:04.903] Browser INFO    %cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold
+[00:00:05.154] Browser ERROR   uncaughtError: TypeError: Cannot read properties of undefined (reading 'createObject')
+[00:00:16.814] Server  WARN     ⚠ Fast Refresh had to perform a full reload due to a runtime error.
+[00:00:16.831] Server  LOG      ✓ Compiled in 41ms
+[00:00:17.411] Browser INFO    %cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold
+[00:00:18.232] Browser ERROR   uncaughtError: TypeError: Cannot read properties of undefined (reading 'isPending')
+[00:00:18.349] Server  WARN     ⚠ Fast Refresh had to perform a full reload due to a runtime error.
+[00:00:18.511] Server  LOG      ✓ Compiled in 37ms
+[00:00:18.851] Browser INFO    %cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold
+[00:00:22.294] Browser INFO    %cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold
+[00:00:44.911] Browser ERROR   Failed to set value on contract {}
+[00:04:21.936] Server  LOG      ✓ Compiled in 73ms
+[00:05:00.118] Browser INFO    %cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold
+[00:05:11.441] Browser ERROR   uncaughtError: Error: Objects are not valid as a React child (found: [object Error]). If you meant to render a collection of children, use an array instead.
+[00:09:04.427] Server  LOG      ✓ Compiled in 134ms
+[00:09:05.434] Browser ERROR   ./heroes_guess_dapp/hooks/useContract.ts:14:1
+Export TransactionBlock doesn't exist in target module
+  12 |   useIotaClientQuery,
+  13 | } from "@iota/dapp-kit";
+> 14 | import { TransactionBlock } from "@iota/iota-sdk/transactions"; // ✅ SDK MỚI
+     | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  15 | import { useNetworkVariable } from "@/lib/config";
+  16 | import type { IotaObjectData } from "@iota/iota-sdk/client";
+  17 |
+
+The export TransactionBlock was not found in module [project]/heroes_guess_dapp/node_modules/@iota/iota-sdk/dist/esm/transactions/index.js [app-client] (ecmascript).
+Did you mean to import Transaction?
+All exports of the module are statically known (It doesn't have dynamic exports). So it's known statically that the requested export doesn't exist.
+
+Import traces:
+  Client Component Browser:
+    ./heroes_guess_dapp/hooks/useContract.ts [Client Component Browser]
+    ./heroes_guess_dapp/app/page.tsx [Client Component Browser]
+    ./heroes_guess_dapp/app/page.tsx [Server Component]
+
+  Client Component SSR:
+    ./heroes_guess_dapp/hooks/useContract.ts [Client Component SSR]
+    ./heroes_guess_dapp/app/page.tsx [Client Component SSR]
+    ./heroes_guess_dapp/app/page.tsx [Server Component]
+[00:09:05.434] Browser ERROR   ./heroes_guess_dapp/hooks/useContract.ts:14:1
+Export TransactionBlock doesn't exist in target module
+  12 |   useIotaClientQuery,
+  13 | } from "@iota/dapp-kit";
+> 14 | import { TransactionBlock } from "@iota/iota-sdk/transactions"; // ✅ SDK MỚI
+     | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  15 | import { useNetworkVariable } from "@/lib/config";
+  16 | import type { IotaObjectData } from "@iota/iota-sdk/client";
+  17 |
+
+The export TransactionBlock was not found in module [project]/heroes_guess_dapp/node_modules/@iota/iota-sdk/dist/esm/transactions/index.js [app-ssr] (ecmascript).
+Did you mean to import Transaction?
+All exports of the module are statically known (It doesn't have dynamic exports). So it's known statically that the requested export doesn't exist.
+
+Import traces:
+  Client Component Browser:
+    ./heroes_guess_dapp/hooks/useContract.ts [Client Component Browser]
+    ./heroes_guess_dapp/app/page.tsx [Client Component Browser]
+    ./heroes_guess_dapp/app/page.tsx [Server Component]
+
+  Client Component SSR:
+    ./heroes_guess_dapp/hooks/useContract.ts [Client Component SSR]
+    ./heroes_guess_dapp/app/page.tsx [Client Component SSR]
+    ./heroes_guess_dapp/app/page.tsx [Server Component]
+[00:12:06.985] Server  LOG      ✓ Compiled in 61ms
+[00:12:07.404] Browser ERROR   ./heroes_guess_dapp/hooks/useContract.ts:14:1
+Export TransactionBlock doesn't exist in target module
+  12 |   useIotaClientQuery,
+  13 | } from "@iota/dapp-kit";
+> 14 | import { TransactionBlock } from "@iota/iota-sdk/transactions";
+     | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  15 | import { useNetworkVariable } from "@/lib/config";
+  16 | import type { IotaObjectData } from "@iota/iota-sdk/client";
+  17 |
+
+The export TransactionBlock was not found in module [project]/heroes_guess_dapp/node_modules/@iota/iota-sdk/dist/esm/transactions/index.js [app-client] (ecmascript).
+Did you mean to import Transaction?
+All exports of the module are statically known (It doesn't have dynamic exports). So it's known statically that the requested export doesn't exist.
+
+Import traces:
+  Client Component Browser:
+    ./heroes_guess_dapp/hooks/useContract.ts [Client Component Browser]
+    ./heroes_guess_dapp/app/page.tsx [Client Component Browser]
+    ./heroes_guess_dapp/app/page.tsx [Server Component]
+
+  Client Component SSR:
+    ./heroes_guess_dapp/hooks/useContract.ts [Client Component SSR]
+    ./heroes_guess_dapp/app/page.tsx [Client Component SSR]
+    ./heroes_guess_dapp/app/page.tsx [Server Component]
+[00:12:07.404] Browser ERROR   ./heroes_guess_dapp/hooks/useContract.ts:14:1
+Export TransactionBlock doesn't exist in target module
+  12 |   useIotaClientQuery,
+  13 | } from "@iota/dapp-kit";
+> 14 | import { TransactionBlock } from "@iota/iota-sdk/transactions";
+     | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  15 | import { useNetworkVariable } from "@/lib/config";
+  16 | import type { IotaObjectData } from "@iota/iota-sdk/client";
+  17 |
+
+The export TransactionBlock was not found in module [project]/heroes_guess_dapp/node_modules/@iota/iota-sdk/dist/esm/transactions/index.js [app-ssr] (ecmascript).
+Did you mean to import Transaction?
+All exports of the module are statically known (It doesn't have dynamic exports). So it's known statically that the requested export doesn't exist.
+
+Import traces:
+  Client Component Browser:
+    ./heroes_guess_dapp/hooks/useContract.ts [Client Component Browser]
+    ./heroes_guess_dapp/app/page.tsx [Client Component Browser]
+    ./heroes_guess_dapp/app/page.tsx [Server Component]
+
+  Client Component SSR:
+    ./heroes_guess_dapp/hooks/useContract.ts [Client Component SSR]
+    ./heroes_guess_dapp/app/page.tsx [Client Component SSR]
+    ./heroes_guess_dapp/app/page.tsx [Server Component]

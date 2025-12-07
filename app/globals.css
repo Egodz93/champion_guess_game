@@ -1,0 +1,194 @@
+@import "tailwindcss";
+
+:root {
+  --background: #ffffff;
+  --foreground: #171717;
+}
+
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --font-sans: var(--font-geist-sans);
+  --font-mono: var(--font-geist-mono);
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --background: #0a0a0a;
+    --foreground: #ededed;
+  }
+}
+
+body {
+  background: var(--background);
+  color: var(--foreground);
+  font-family: Arial, Helvetica, sans-serif;
+}
+
+/* New Styles for the Game */
+:root {
+  --primary-color: #0BC6E3; /* A bright, cyber-teal */
+  --secondary-color: #7A00F4; /* A deep purple */
+  --background-dark: #111827; /* A very dark blue-gray */
+  --card-background: #1F2937; /* A slightly lighter dark blue-gray */
+  --text-light: #F9FAFB;
+  --text-dark: #D1D5DB;
+  --success-color: #10B981;
+  --error-color: #EF4444;
+  --border-color: #374151;
+}
+
+body {
+  background: var(--background-dark);
+  color: var(--text-light);
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  margin: 0;
+  padding: 0;
+}
+
+.container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 1rem;
+}
+
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 1rem 2rem;
+  border-bottom: 1px solid var(--border-color);
+}
+
+.header h1 {
+  font-size: 1.8rem;
+  color: var(--primary-color);
+  text-shadow: 0 0 5px var(--primary-color);
+}
+
+.main-content {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2rem;
+  padding: 2rem 0;
+}
+
+.game-card {
+  background: var(--card-background);
+  border-radius: 16px;
+  border: 1px solid var(--border-color);
+  padding: 2rem;
+  width: 100%;
+  max-width: 480px;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+  text-align: center;
+}
+
+.game-intro, .game-active {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1.5rem;
+}
+
+.champion-image-container {
+  border-radius: 12px;
+  overflow: hidden;
+  border: 2px solid var(--primary-color);
+  box-shadow: 0 0 15px var(--primary-color);
+}
+
+.champion-image {
+  display: block;
+}
+
+.score {
+  font-size: 2rem;
+  font-weight: bold;
+  color: var(--text-light);
+}
+
+.message {
+  font-size: 1.1rem;
+  color: var(--text-dark);
+  min-height: 40px;
+}
+
+.input-group {
+  display: flex;
+  width: 100%;
+}
+
+.guess-input {
+  flex-grow: 1;
+  background: #2b3647;
+  border: 1px solid var(--border-color);
+  border-radius: 8px 0 0 8px;
+  padding: 0.8rem 1rem;
+  font-size: 1rem;
+  color: var(--text-light);
+  outline: none;
+}
+
+.guess-input:focus {
+  border-color: var(--primary-color);
+  box-shadow: 0 0 5px var(--primary-color);
+}
+
+.btn {
+  padding: 0.8rem 1.5rem;
+  border: none;
+  border-radius: 8px;
+  font-size: 1rem;
+  font-weight: bold;
+  cursor: pointer;
+  transition: all 0.2s ease-in-out;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+
+.btn-start {
+  background: var(--primary-color);
+  color: var(--background-dark);
+  box-shadow: 0 0 10px var(--primary-color);
+}
+
+.btn-start:hover {
+  transform: scale(1.05);
+}
+
+.btn-guess {
+  background: var(--secondary-color);
+  color: var(--text-light);
+  border-radius: 0 8px 8px 0;
+}
+
+.btn-guess:hover {
+  opacity: 0.9;
+}
+
+.btn-stop {
+  background: var(--error-color);
+  color: var(--text-light);
+}
+
+.btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.contract-status {
+  width: 100%;
+  max-width: 480px;
+  text-align: center;
+  background: var(--card-background);
+  padding: 1.5rem;
+  border-radius: 12px;
+}
+
+.error-message {
+  color: var(--error-color);
+  font-weight: bold;
+}
+
